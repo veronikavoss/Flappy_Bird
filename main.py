@@ -6,7 +6,6 @@ from controller import *
 class Game(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        pygame.init()
         pygame.display.set_caption(title)
         self.screen=pygame.display.set_mode(screen_size)
         self.clock=pygame.time.Clock()
@@ -37,8 +36,8 @@ class Game(pygame.sprite.Sprite):
         self.controller.update()
     
     def draw(self):
-        self.screen.fill('black')
+        # self.screen.fill('black')
         self.controller.draw(self.screen)
 
 flappy_bird=Game()
-pygame.quit()
+pygame.quit()      
