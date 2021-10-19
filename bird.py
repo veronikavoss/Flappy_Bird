@@ -17,11 +17,16 @@ class Bird(pygame.sprite.Sprite):
         self.image.set_colorkey((0,0,0))
         self.animation_speed=0.15
         
-        self.rect=self.image.get_rect(centerx=120,centery=screen_height/2)
+        self.rect=self.image.get_rect(x=screen_width/4,y=(screen_height-(ground_h*3))/2)
         self.direction=pygame.math.Vector2(0,0)
         self.dx,self.dy=self.direction.x,self.direction.y
-        self.gravity_force=0.5
+        self.dy=-1
+        self.gravity_force=0
         self.jump_speed=-6
+        
+        self.limit_time=True
+        self.limit_timer=pygame.USEREVENT
+        pygame.time.set_timer(self.limit_timer,400)
     
     def get_image(self,x):
         sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png')).convert_alpha()
@@ -43,31 +48,47 @@ class Bird(pygame.sprite.Sprite):
     def gravity(self):
         self.rect.y+=self.dy
         self.dy+=self.gravity_force
+        
+        if self.action=='standby':
+            self.gravity_force=0
+        else:
+            self.gravity_force=0.5
     
     def set_input(self):
         self.key_input=pygame.key.get_pressed()
         if self.key_input[pygame.K_SPACE]:
+            self.play_game=True
             self.dy=self.jump_speed
     
     def set_action(self):
-        if self.rect.bottom<650 and not self.play_game:
+        if self.play_game and self.dy<0:
+            self.action='riging'
+        else:
+            self.action='fall'
+            
+        if not self.play_game and self.rect.bottom<screen_height-ground_h*3:
             self.action='standby'
-        elif self.rect.bottom<650 and self.play_game:
+        elif self.play_game and self.rect.bottom<screen_height-ground_h*3:
             self.action='playing'
         else:
+            self.action='die'
             self.dy=0
             self.gravity_force=0
-            self.rect.bottom=650
-            self.action='die'
+            self.rect.bottom=screen_height-ground_h*3
             self.play_game=True
     
     def animation(self):
         color=self.images[self.color]
         self.index_img+=self.animation_speed
-        if self.index_img>=len(color):
-            self.index_img=0
-        self.image=color[int(self.index_img)]
-        self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
+        if not self.action=='die':
+            if self.index_img>=len(color):
+                self.index_img=0
+            self.image=color[int(self.index_img)]
+            self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
+            if self.action=='playing':
+                self.image=pygame.transform.rotozoom(self.image,max(self.dy*-4,-90),1)
+            # elif self.action=='die':
+            #     self.image=pygame.transform.rotozoom(self.image,-90,1)
         self.image.set_colorkey((0,0,0))
     
     def update(self):
@@ -78,4 +99,5 @@ class Bird(pygame.sprite.Sprite):
     
     # def draw(self,display):
     #     display.blit(self.image,self.rect)
-    #     print(self.action)
+        # print(self.action,self.rect.y,self.dy,self.gravity_force)
+        print(self.dy*-4)
