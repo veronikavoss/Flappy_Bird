@@ -42,6 +42,12 @@ class Game(pygame.sprite.Sprite):
                 else:
                     self.controller.bird.dy=-1
                     self.controller.bird.limit_time=True
+            if event.type==self.controller.pipe_spawn_cooldown and self.controller.bird.action=='playing' and not self.controller.pipe.spawn_pipe:
+                self.controller.pipe.spawn_pipe=True
+                # self.controller.pipe_list.append()
+                # for pipe in self.controller.pipe.pipes:
+                self.controller.pipes.add(self.controller.pipe)
+                print('pipe',len(self.controller.pipes))
     
     def update(self):
         self.controller.update()
