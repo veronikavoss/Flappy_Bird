@@ -17,7 +17,7 @@ class Bird(pygame.sprite.Sprite):
         self.image.set_colorkey((0,0,0))
         self.animation_speed=0.15
         
-        self.rect=self.image.get_rect(x=screen_width/4,y=(screen_height-(ground_h*3))/2)
+        self.rect=self.image.get_rect(x=screen_width/4,y=(ground_top/2))
         self.direction=pygame.math.Vector2(0,0)
         self.dx,self.dy=self.direction.x,self.direction.y
         self.dy=-1
@@ -70,13 +70,13 @@ class Bird(pygame.sprite.Sprite):
             
         if not self.play_game and self.rect.top<screen_height//2:
             self.action='standby'
-        elif self.play_game and self.rect.bottom<screen_height-ground_h*3:
+        elif self.play_game and self.rect.bottom<ground_top:
             self.action='playing'
-        elif self.play_game and self.rect.bottom>screen_height-ground_h*3:
+        elif self.play_game and self.rect.bottom>ground_top:
             self.action='die'
             self.play_game=False
             self.dy=0
-            self.rect.bottom=screen_height-ground_h*3-5
+            self.rect.bottom=ground_top-5
     
     def animation(self):
         color=self.images[self.color]
