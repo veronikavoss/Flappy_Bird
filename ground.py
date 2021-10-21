@@ -12,7 +12,7 @@ class Ground:
         self.ground_rect=self.ground_image.get_rect(bottom=screen_height)
     
     def update(self):
-        self.ground_rect.x-=3
+        self.ground_rect.x-=game_speed
         if self.ground_rect.right<=0:
             self.ground_rect.left=0
     

@@ -3,16 +3,13 @@ import pygame,os
 from setting import *
 #%%
 class Pipe(pygame.sprite.Sprite):
-    def __init__(self,left,top):
+    def __init__(self,midtop,img):
         super().__init__()
-        self.spawn_pipe=False
-        
         self.pipe_size=self.pipe_w,self.pipe_h=26,160
         self.add_image()
-        self.image=self.images[1]
+        self.image=self.images[img]
         self.image=pygame.transform.scale(self.image,(self.pipe_w*3,self.pipe_h*3))
-        self.rect=self.image.get_rect(left=left,top=top)
-        # self.rect2=self.image2.get_rect(left=left,y=self.rect1.top-self.rect1.h-200)
+        self.rect=self.image.get_rect(midtop=midtop)
         self.image.set_colorkey((0,0,0))
     
     def get_image(self,blit_x):
@@ -28,9 +25,4 @@ class Pipe(pygame.sprite.Sprite):
             self.images.append(self.get_image(i))
     
     def update(self):
-        self.rect.x-=3
-    
-    # def draw(self,display):
-    #     self.image=pygame.transform.scale(self.image,(self.pipe_w*3,self.pipe_h*3))
-    #     self.image.set_colorkey((0,0,0))
-    #     display.blit(self.image,self.rect)
+        self.rect.x-=game_speed

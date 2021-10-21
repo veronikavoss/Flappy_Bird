@@ -35,26 +35,28 @@ class Game(pygame.sprite.Sprite):
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 self.playing=False
+            
             if event.type==self.controller.bird.limit_timer and self.controller.bird.action=='standby':
                 if self.controller.bird.limit_time:
                     self.controller.bird.dy=1
-                    self.controller.bird.limit_time=False
+                    self.controller.bird.limit_time=False 
                 else:
                     self.controller.bird.dy=-1
                     self.controller.bird.limit_time=True
-            if event.type==self.controller.pipe_spawn_cooldown and self.controller.bird.action=='playing':
+            if event.type==self.controller.pipe_spawn_cooldown and self.controller.bird.play_game and not self.controller.bird.game_over:
                 self.controller.create_pipe()
-                # self.controller.pipe_list.append(self.controller.create_pipe())
-                # for pipe in self.controller.pipe.pipes:
-                # self.controller.pipes.add(self.controller.pipe)
-                print(len(self.controller.pipes))
+            if event.type==self.controller.bird_pipe_crash and self.controller.bird.crash_pipe:
+                print('crash')
+            
+            if event.type==pygame.KEYUP or event.type==pygame.MOUSEBUTTONUP:
+                if self.controller.bird.game_over and self.controller.bird.rect.bottom==ground_top:
+                    self.game_start()
     
     def update(self):
         self.controller.update()
     
     def draw(self):
-        # self.screen.fill('black')
         self.controller.draw(self.screen)
 
 flappy_bird=Game()
-pygame.quit()      
+pygame.quit()

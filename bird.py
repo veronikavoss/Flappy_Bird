@@ -6,6 +6,8 @@ class Bird(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.play_game=False
+        self.crash_pipe=False
+        self.game_over=False
         
         self.bird_size=self.bird_w,self.bird_h=17,12
         self.color='yellow'
@@ -54,13 +56,24 @@ class Bird(pygame.sprite.Sprite):
         if self.action=='standby' or self.action=='die':
             self.gravity_force=0
         else:
-            self.gravity_force=0.5
+            self.gravity_force=0.6
     
     def set_input(self):
+        self.mouse_input=pygame.mouse.get_pressed()
         self.key_input=pygame.key.get_pressed()
-        if self.key_input[pygame.K_SPACE]:
-            self.play_game=True
-            self.dy=self.jump_speed
+        if (self.key_input[pygame.K_SPACE] or self.mouse_input[0]) and self.rect.top>-180:
+            if self.action=='standby':
+                self.play_game=True
+            elif self.play_game and not self.game_over:
+                self.dy=self.jump_speed
+    
+    def collision(self,bird,pipes):
+        for pipe in pipes:
+            if pygame.sprite.collide_mask(bird,pipe):
+                self.action='crash'
+                self.play_game=False
+                self.game_over=True
+                self.crash_pipe=True
     
     def set_action(self):
         if self.play_game and self.dy<0:
@@ -68,38 +81,38 @@ class Bird(pygame.sprite.Sprite):
         elif self.play_game and self.dy>0:
             self.action='fall'
             
-        if not self.play_game and self.rect.top<screen_height//2:
+        if not self.play_game and not self.game_over and self.rect.top<screen_height//2:
             self.action='standby'
-        elif self.play_game and self.rect.bottom<ground_top:
-            self.action='playing'
         elif self.play_game and self.rect.bottom>ground_top:
             self.action='die'
             self.play_game=False
-            self.dy=0
-            self.rect.bottom=ground_top-5
+            self.game_over=True
+            
+        if self.action=='crash' or self.action=='die':
+            if self.rect.bottom>ground_top:
+                self.dy=0
+                self.rect.bottom=ground_top
     
     def animation(self):
         color=self.images[self.color]
-        if not self.action=='die':
+        if not self.action=='die' and not self.action=='crash':
             self.index_img+=self.animation_speed
             if self.index_img>=len(color):
                 self.index_img=0
             self.image=color[int(self.index_img)]
             self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
-            if self.action=='playing':
+            if self.play_game and not self.game_over:
                 self.image=pygame.transform.rotozoom(self.image,max(self.dy*-4,-90),1)
         else:
             self.image=color[2]
             self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
             self.image=pygame.transform.rotozoom(self.image,-90,1)
+            # pygame.time.delay(2000)
         self.image.set_colorkey((0,0,0))
     
-    def update(self):
+    def update(self,bird,pipes):
         self.gravity()
         self.set_input()
+        self.collision(bird,pipes)
         self.set_action()
         self.animation()
-    
-    # def draw(self,display):
-    #     display.blit(self.image,self.rect)
-        # print(self.action,self.rect.y,self.dy,self.gravity_force)
