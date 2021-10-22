@@ -1,5 +1,5 @@
 #%%
-import os
+import os,pygame
 #%%
 title='Flappy Bird'
 screen_size=screen_width,screen_height=432,768

@@ -1,6 +1,4 @@
 #%%
-import pygame,os
-from setting import *
 from controller import *
 #%%
 class Game(pygame.sprite.Sprite):
@@ -39,7 +37,7 @@ class Game(pygame.sprite.Sprite):
             if event.type==self.controller.bird.limit_timer and self.controller.bird.action=='standby':
                 if self.controller.bird.limit_time:
                     self.controller.bird.dy=1
-                    self.controller.bird.limit_time=False 
+                    self.controller.bird.limit_time=False
                 else:
                     self.controller.bird.dy=-1
                     self.controller.bird.limit_time=True

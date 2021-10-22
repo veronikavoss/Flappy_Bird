@@ -1,5 +1,4 @@
 #%%
-import pygame,os
 from setting import *
 #%%
 class Ground:

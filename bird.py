@@ -1,5 +1,4 @@
 #%%
-import pygame
 from setting import *
 #%%
 class Bird(pygame.sprite.Sprite):
@@ -8,6 +7,7 @@ class Bird(pygame.sprite.Sprite):
         self.play_game=False
         self.crash_pipe=False
         self.game_over=False
+        self.riging=False
         
         self.bird_size=self.bird_w,self.bird_h=17,12
         self.color='yellow'
@@ -24,16 +24,16 @@ class Bird(pygame.sprite.Sprite):
         self.dx,self.dy=self.direction.x,self.direction.y
         self.dy=-1
         self.gravity_force=0
-        self.jump_speed=-6
+        self.jump_speed=-8
         
         self.limit_time=True
         self.limit_timer=pygame.USEREVENT+1
         pygame.time.set_timer(self.limit_timer,400)
     
     def get_image(self,x):
-        sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png')).convert_alpha()
+        sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png'))
         
-        self.image=pygame.Surface(self.bird_size).convert_alpha()
+        self.image=pygame.Surface(self.bird_size)
         self.image.blit(sheet_image,(0,0),(3+((self.bird_w+11)*x),491,self.bird_w,self.bird_h))
         return self.image
     
@@ -64,7 +64,7 @@ class Bird(pygame.sprite.Sprite):
         if (self.key_input[pygame.K_SPACE] or self.mouse_input[0]) and self.rect.top>-180:
             if self.action=='standby':
                 self.play_game=True
-            elif self.play_game and not self.game_over:
+            elif self.play_game and not self.game_over and self.riging==False:
                 self.dy=self.jump_speed
     
     def collision(self,bird,pipes):
@@ -78,8 +78,10 @@ class Bird(pygame.sprite.Sprite):
     def set_action(self):
         if self.play_game and self.dy<0:
             self.action='riging'
+            self.riging=True
         elif self.play_game and self.dy>0:
             self.action='fall'
+            self.riging=False
             
         if not self.play_game and not self.game_over and self.rect.top<screen_height//2:
             self.action='standby'
@@ -107,7 +109,6 @@ class Bird(pygame.sprite.Sprite):
             self.image=color[2]
             self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
             self.image=pygame.transform.rotozoom(self.image,-90,1)
-            # pygame.time.delay(2000)
         self.image.set_colorkey((0,0,0))
     
     def update(self,bird,pipes):
