@@ -4,6 +4,7 @@ from controller import *
 class Game(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        pygame.mixer.pre_init(44100,-16,2,512)
         pygame.init()
         pygame.display.set_caption(title)
         self.screen=pygame.display.set_mode(screen_size)
@@ -18,6 +19,8 @@ class Game(pygame.sprite.Sprite):
     
     def game_start(self):
         self.controller=Controller()
+        self.bird_move_count=0
+        self.tap_count=0
         self.loop()
     
     def loop(self):
@@ -33,21 +36,27 @@ class Game(pygame.sprite.Sprite):
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 self.playing=False
+                quit()
             
             if event.type==self.controller.bird.limit_timer and self.controller.bird.action=='standby':
-                if self.controller.bird.limit_time:
-                    self.controller.bird.dy=1
-                    self.controller.bird.limit_time=False
-                else:
+                self.bird_move_count+=1
+                if self.bird_move_count%2==0:
                     self.controller.bird.dy=-1
-                    self.controller.bird.limit_time=True
+                else:
+                    self.controller.bird.dy=1
+            if event.type==self.controller.tap_motion and self.controller.bird.action=='standby':
+                self.tap_count+=1
+                if self.tap_count%2==0:
+                    self.controller.tap_img_rect.y+=10
+                else:
+                    self.controller.tap_img_rect.y-=10
             if event.type==self.controller.pipe_spawn_cooldown and self.controller.bird.play_game and not self.controller.bird.game_over:
                 self.controller.create_pipe()
-            if event.type==self.controller.bird_pipe_crash and self.controller.bird.crash_pipe:
-                print('crash')
             
-            if event.type==pygame.KEYUP or event.type==pygame.MOUSEBUTTONUP:
-                if self.controller.bird.game_over and self.controller.bird.rect.bottom==ground_top:
+            if self.controller.bird.game_over:
+                mouse_pos=pygame.mouse.get_pos()
+                if  event.type==pygame.MOUSEBUTTONUP and self.controller.game_over_play_button_img_rect.collidepoint(mouse_pos):
+                    self.controller.sfx_swooshing.play()
                     self.game_start()
     
     def update(self):
