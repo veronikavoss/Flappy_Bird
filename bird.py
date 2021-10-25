@@ -2,8 +2,9 @@
 from setting import *
 #%%
 class Bird(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,start_screen):
         super().__init__()
+        self.start_screen=start_screen
         self.play_game=False
         self.crash_pipe=False
         self.game_over=False
@@ -21,12 +22,12 @@ class Bird(pygame.sprite.Sprite):
         self.image.set_colorkey((0,0,0))
         self.animation_speed=0.15
         
-        self.rect=self.image.get_rect(x=screen_width/4,y=ground_top/2)
+        self.start_pos()
         self.direction=pygame.math.Vector2(0,0)
         self.dx,self.dy=self.direction.x,self.direction.y
         self.dy=-1
         self.gravity_force=0
-        self.jump_speed=-8
+        self.jump_speed=-10
         
         self.limit_timer=pygame.USEREVENT+1
         pygame.time.set_timer(self.limit_timer,400)
@@ -38,6 +39,12 @@ class Bird(pygame.sprite.Sprite):
         self.image.blit(sheet_image,(0,0),(3+((self.bird_w+11)*x),491,self.bird_w,self.bird_h))
         self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
         return self.image
+    
+    def start_pos(self):
+        if self.start_screen:
+            self.rect=self.image.get_rect(center=(screen_width/2,screen_height/2-30))
+        else:
+            self.rect=self.image.get_rect(x=screen_width/4,y=ground_top/2)
     
     def add_image(self):
         temp=[]
@@ -55,7 +62,7 @@ class Bird(pygame.sprite.Sprite):
         self.rect.y+=self.dy
         self.dy+=self.gravity_force
         
-        if self.action=='standby' or self.action=='die':
+        if self.action=='start_screen' or self.action=='standby' or self.action=='die':
             self.gravity_force=0
         else:
             self.gravity_force=0.6
@@ -64,7 +71,7 @@ class Bird(pygame.sprite.Sprite):
         self.mouse_input=pygame.mouse.get_pressed()
         self.key_input=pygame.key.get_pressed()
         if (self.key_input[pygame.K_SPACE] or self.mouse_input[0]) and self.rect.top>-180:
-            if self.action=='standby':
+            if not self.start_screen and self.action=='standby':
                 self.play_game=True
             elif self.play_game and not self.game_over and not self.riging and not self.pressed:
                 self.dy=self.jump_speed
@@ -84,6 +91,8 @@ class Bird(pygame.sprite.Sprite):
                 self.game_over=True
     
     def set_action(self,crash_sound):
+        if self.start_screen:
+            self.action='start_screen'
         if self.play_game and self.dy<0:
             self.action='riging'
             self.riging=True
@@ -91,7 +100,7 @@ class Bird(pygame.sprite.Sprite):
             self.action='fall'
             self.riging=False
             
-        if not self.play_game and not self.game_over and self.rect.top<screen_height//2:
+        if not self.start_screen and not self.play_game and not self.game_over and self.rect.top<screen_height//2:
             self.action='standby'
         elif self.play_game and self.rect.bottom>ground_top:
             self.action='die'

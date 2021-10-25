@@ -1,24 +1,19 @@
 #%%
 from controller import *
 #%%
-class Game(pygame.sprite.Sprite):
+class Game:
     def __init__(self):
-        super().__init__()
-        pygame.mixer.pre_init(44100,-16,2,512)
         pygame.init()
+        pygame.mixer.pre_init(44100,-16,2,512)
         pygame.display.set_caption(title)
         self.screen=pygame.display.set_mode(screen_size)
         self.clock=pygame.time.Clock()
-        self.start_screen()
-    
-    def start_screen(self):
-        # self.controller=Controller()
-        # if not self.controller.bird.play_game:
-        #     self.game_start()
+        self.start_screen=True
+        self.high_score=0
         self.game_start()
     
     def game_start(self):
-        self.controller=Controller()
+        self.controller=Controller(self.start_screen,self.high_score)
         self.bird_move_count=0
         self.tap_count=0
         self.loop()
@@ -38,7 +33,7 @@ class Game(pygame.sprite.Sprite):
                 self.playing=False
                 quit()
             
-            if event.type==self.controller.bird.limit_timer and self.controller.bird.action=='standby':
+            if event.type==self.controller.bird.limit_timer and (self.controller.bird.action=='standby' or self.start_screen):
                 self.bird_move_count+=1
                 if self.bird_move_count%2==0:
                     self.controller.bird.dy=-1
@@ -52,11 +47,13 @@ class Game(pygame.sprite.Sprite):
                     self.controller.tap_img_rect.y-=10
             if event.type==self.controller.pipe_spawn_cooldown and self.controller.bird.play_game and not self.controller.bird.game_over:
                 self.controller.create_pipe()
+                print('create_pipe')
             
-            if self.controller.bird.game_over:
+            if self.start_screen or self.controller.bird.game_over:
                 mouse_pos=pygame.mouse.get_pos()
                 if  event.type==pygame.MOUSEBUTTONUP and self.controller.game_over_play_button_img_rect.collidepoint(mouse_pos):
                     self.controller.sfx_swooshing.play()
+                    self.start_screen=False
                     self.game_start()
     
     def update(self):

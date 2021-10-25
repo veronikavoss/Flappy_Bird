@@ -6,15 +6,15 @@ from bird import *
 from pipe import *
 #%%
 class Controller:
-    def __init__(self):
-        self.start_screen=True
-        
+    def __init__(self,start_screen,high_score):
+        self.start_screen=start_screen
+        self.high_score=high_score
         self.add_image()
         self.add_sound()
         self.background()
         self.pipes=pygame.sprite.Group()
         self.ground=Ground()
-        self.bird=Bird()
+        self.bird=Bird(self.start_screen)
         self.bird_sprite=pygame.sprite.GroupSingle(self.bird)
         self.score=0
         self.update_score=0
@@ -36,12 +36,12 @@ class Controller:
         self.sfx_wing=pygame.mixer.Sound(os.path.join(sound_path,'sfx_wing.wav'))
         self.sfx_wing.set_volume(0.5)
     
-    def get_number_image(self,num_x):
+    def get_number_image(self,num_x,size):
         self.sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png'))
         num_size=num_w,num_h=12,18
         num_image=pygame.Surface(num_size)
         num_image.blit(self.sheet_image,(0,0),(292+num_x*14,160,num_w,num_h))
-        num_image=pygame.transform.scale(num_image,(num_w*3,num_h*3))
+        num_image=pygame.transform.scale(num_image,(num_w*size,num_h*size))
         num_image.set_colorkey((0,0,0))
         return num_image
     
@@ -50,21 +50,26 @@ class Controller:
             'logo':'',
             'play_button':'',
             'score_num':[],
+            'score_small_num':[],
             'ready':'',
             'tap':'',
             'game_over':'',
-            'score_board':'',
             'rank':'',
+            'score_board':'',
+            'new':'',
             'medal':[]
         }
         for num_x in range(10):
-            self.images['score_num'].append(self.get_number_image(num_x))
+            self.images['score_num'].append(self.get_number_image(num_x,3))
+        
+        for num_x in range(10):
+            self.images['score_small_num'].append(self.get_number_image(num_x,2))
         
         logo_img=pygame.Surface((89,24))
         logo_img.blit(self.sheet_image,(0,0),(351,91,89,24))
         logo_img=pygame.transform.scale(logo_img,(89*3,24*3))
         logo_img.set_colorkey((0,0,0))
-        self.logo_img_rect=logo_img.get_rect(center=(screen_width/2,300))
+        self.logo_img_rect=logo_img.get_rect(center=(screen_width/2,200))
         self.images['logo']=logo_img
         
         play_button_img=pygame.Surface((52,29))
@@ -72,7 +77,7 @@ class Controller:
         play_button_img=pygame.transform.scale(play_button_img,(52*3,29*3))
         play_button_img.set_colorkey((0,0,0))
         self.start_play_button_img_rect=play_button_img.get_rect(center=(screen_width/2,500))
-        self.game_over_play_button_img_rect=play_button_img.get_rect(center=(screen_width/4,500))
+        self.game_over_play_button_img_rect=play_button_img.get_rect(center=(screen_width//4+10,500))
         self.images['play_button']=play_button_img
         
         ready_img=pygame.Surface((92,25))
@@ -96,6 +101,13 @@ class Controller:
         self.game_over_img_rect=game_over_img.get_rect(center=(screen_width/2,100))
         self.images['game_over']=game_over_img
         
+        rank_img=pygame.Surface((52,29))
+        rank_img.blit(self.sheet_image,(0,0),(414,118,52,29))
+        rank_img=pygame.transform.scale(rank_img,(52*3,29*3))
+        rank_img.set_colorkey((0,0,0))
+        self.rank_img_rect=rank_img.get_rect(center=(screen_width-(screen_width//4)-10,500))
+        self.images['rank']=rank_img
+        
         score_board_img=pygame.Surface((113,57))
         score_board_img.blit(self.sheet_image,(0,0),(3,259,113,57))
         score_board_img=pygame.transform.scale(score_board_img,(113*3,57*3))
@@ -103,12 +115,12 @@ class Controller:
         self.score_board_img_rect=score_board_img.get_rect(centerx=screen_width/2,bottom=screen_height/2)
         self.images['score_board']=score_board_img
         
-        rank_img=pygame.Surface((52,29))
-        rank_img.blit(self.sheet_image,(0,0),(414,118,52,29))
-        rank_img=pygame.transform.scale(rank_img,(52*3,29*3))
-        rank_img.set_colorkey((0,0,0))
-        self.rank_img_rect=rank_img.get_rect(center=(screen_width-(screen_width/4),500))
-        self.images['rank']=rank_img
+        new_img=pygame.Surface((16,7))
+        new_img.blit(self.sheet_image,(0,0),(112,501,16,7))
+        new_img=pygame.transform.scale(new_img,(16*3,7*3))
+        new_img.set_colorkey((0,0,0))
+        self.new_img_rect=new_img.get_rect(x=250,y=300)
+        self.images['new']=new_img
         
         medal_pos=[[121,258,22,22],[121,282,22,22],[112,453,22,22],[112,477,22,22]]
         for pos in medal_pos:
@@ -158,10 +170,9 @@ class Controller:
         return blit
     
     def blit_start_screen(self,display):
-        if self.start_screen:
-            display.blit(self.images['logo'],self.logo_img_rect)
-            display.blit(self.images['score_board'],self.score_board_img_rect)
-            display.blit(self.images['play_button'],self.game_over_play_button_img_rect)
+        display.blit(self.images['logo'],self.logo_img_rect)
+        display.blit(self.images['play_button'],self.game_over_play_button_img_rect)
+        display.blit(self.images['rank'],self.rank_img_rect)
     
     def blit_standby_screen(self,display):
         if self.bird.action=='standby':
@@ -170,7 +181,7 @@ class Controller:
         else:
             self.pipes.draw(display)
     
-    def blit_number(self,display,y):
+    def blit_score(self,display,y):
         pos_x=len(str(self.score//2))
         if pos_x==1:
             number1=self.images['score_num'][int(str(self.score//2)[-1])]
@@ -207,12 +218,60 @@ class Controller:
             display.blit(number3,number3_rect)
             display.blit(number4,number4_rect)
     
+    def blit_small_score(self,display):
+        num_x,num_y,high_num_y=330,260,324
+        num_w,num_h=24,36
+        num=str(self.score//2)
+        num_len=len(num)
+        if num_len==1:
+            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
+        elif num_len==2:
+            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
+            display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,num_y))
+        elif num_len==3:
+            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
+            display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,num_y))
+            display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,num_y))
+        elif num_len==4:
+            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
+            display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,num_y))
+            display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,num_y))
+            display.blit(self.images['score_small_num'][int(num[-4])],(num_x-num_w*3,num_y))
+        if self.bird.game_over_screen:
+            update=self.score//2
+            print(update)
+            if self.high_score<self.score:
+                self.high_score=update
+                # High_score=self.score
+                display.blit(self.images['new'],self.new_img_rect)
+                if num_len==1:
+                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
+                elif num_len==2:
+                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,high_num_y))
+                elif num_len==3:
+                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,high_num_y))
+                    display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,high_num_y))
+                elif num_len==4:
+                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,high_num_y))
+                    display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,high_num_y))
+                    display.blit(self.images['score_small_num'][int(num[-4])],(num_x-num_w*3,high_num_y))
+    
+    def set_high_score(self):
+        if self.bird.game_over_screen:
+            if self.high_score<self.score//2:
+                self.high_score=self.score//2
+        return self.high_score
+    
     def blit_game_over_screen(self,display):
         if self.bird.game_over_screen:
             display.blit(self.images['game_over'],self.game_over_img_rect)
-            display.blit(self.images['score_board'],self.score_board_img_rect)
             display.blit(self.images['play_button'],self.game_over_play_button_img_rect)
             display.blit(self.images['rank'],self.rank_img_rect)
+            display.blit(self.images['score_board'],self.score_board_img_rect)
+            self.blit_small_score(display)
             if self.score//2>=40:
                 display.blit(self.images['medal'][0],self.medal_img_rect)
             elif self.score//2>=30:
@@ -222,13 +281,19 @@ class Controller:
             elif self.score//2>=10:
                 display.blit(self.images['medal'][3],self.medal_img_rect)
         else:
-            self.blit_number(display,50)
+            self.blit_score(display,50)
     
     def draw(self,display):
-        display.blit(self.background_image,self.background_rect)
-        self.ground.draw(display)
-        # self.blit_start_screen(display)
-        self.blit_standby_screen(display)
-        self.bird_sprite.draw(display)
-        self.blit_game_over_screen(display)
-        # self.text(display)
+        if self.start_screen:
+            display.blit(self.background_image,self.background_rect)
+            self.ground.draw(display)
+            self.bird_sprite.draw(display)
+            self.blit_start_screen(display)
+        else:
+            display.blit(self.background_image,self.background_rect)
+            self.ground.draw(display)
+            self.blit_standby_screen(display)
+            self.bird_sprite.draw(display)
+            self.blit_game_over_screen(display)
+            # self.text(display)
+            print(self.high_score,self.score//2)

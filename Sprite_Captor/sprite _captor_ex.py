@@ -14,7 +14,8 @@ HALF_SCREEN_WIDTH=int(SCREEN_WIDTH/2)
 HALF_SCREEN_HEIGHT=int(SCREEN_HEIGHT/2)
 SPRITE_FILE_NAME = "sprite_info.spr"
 ANIMATION_FILE_NAME = "animation_info.anm"
-
+# file_name="NES - Urban Champion - Characters.png"
+file_name="image/flappy_bird_sheet_1.png"
 
   
 def scale_image(image, scale):
@@ -42,20 +43,20 @@ def save_data(sprites, animations):
     with open(SPRITE_FILE_NAME, 'w') as file:
          data = ""
          for i in range(len(sprites['rect'])):
-             data += str(sprites['rect'][i][0]) + " "
-             data += str(sprites['rect'][i][1]) + " "
-             data += str(sprites['rect'][i][2]) + " "
-             data += str(sprites['rect'][i][3]) + ","                              
-             data += str(sprites['axis_shift'][i][0]) + " "
-             data += str(sprites['axis_shift'][i][1]) + ","
-             data += str(sprites['offense_box'][i][0]) + " "
-             data += str(sprites['offense_box'][i][1]) + " "
-             data += str(sprites['offense_box'][i][2]) + " "
-             data += str(sprites['offense_box'][i][3]) + ","
-             data += str(sprites['defense_box'][i][0]) + " "
-             data += str(sprites['defense_box'][i][1]) + " "
-             data += str(sprites['defense_box'][i][2]) + " "
-             data += str(sprites['defense_box'][i][3]) + ";"
+             data += '[' + str(sprites['rect'][i][0]) + ","
+             data += str(sprites['rect'][i][1]) + ","
+             data += str(sprites['rect'][i][2]) + ","
+             data += str(sprites['rect'][i][3]) + "]"                              
+            #  data += str(sprites['axis_shift'][i][0]) + " "
+            #  data += str(sprites['axis_shift'][i][1]) + ","
+            #  data += str(sprites['offense_box'][i][0]) + " "
+            #  data += str(sprites['offense_box'][i][1]) + " "
+            #  data += str(sprites['offense_box'][i][2]) + " "
+            #  data += str(sprites['offense_box'][i][3]) + ","
+            #  data += str(sprites['defense_box'][i][0]) + " "
+            #  data += str(sprites['defense_box'][i][1]) + " "
+            #  data += str(sprites['defense_box'][i][2]) + " "
+            #  data += str(sprites['defense_box'][i][3]) + ";"
          file.write(data)
     with open(ANIMATION_FILE_NAME, 'w') as file:
          data = ""
@@ -786,7 +787,7 @@ def main():
     font=pygame.font.SysFont('Arial', 30)
 
     #images
-    original_image=pygame.image.load("image/flappy_bird_sheet_1.png").convert()
+    original_image=pygame.image.load(file_name).convert()
     image=original_image.copy()
     #variables
     global image_transparency, alpha_color
