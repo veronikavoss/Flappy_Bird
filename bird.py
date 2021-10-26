@@ -16,10 +16,9 @@ class Bird(pygame.sprite.Sprite):
         self.color='yellow'
         self.action='standby'
         self.index_img=0
+        self.sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png'))
         self.add_image()
         self.image=self.images[self.color][self.index_img]
-        self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
-        self.image.set_colorkey((0,0,0))
         self.animation_speed=0.15
         
         self.start_pos()
@@ -32,29 +31,42 @@ class Bird(pygame.sprite.Sprite):
         self.limit_timer=pygame.USEREVENT+0
         pygame.time.set_timer(self.limit_timer,400)
     
-    def get_image(self,x):
-        sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png'))
-        
-        self.image=pygame.Surface(self.bird_size)
-        self.image.blit(sheet_image,(0,0),(3+((self.bird_w+11)*x),491,self.bird_w,self.bird_h))
-        self.image=pygame.transform.scale(self.image,(self.bird_w*3,self.bird_h*3))
-        return self.image
-    
     def start_pos(self):
         if self.start_screen:
+            self.color='yellow'
             self.rect=self.image.get_rect(center=(screen_width/2,screen_height/2-30))
         else:
+            self.color=choice(list(self.images.keys()))
             self.rect=self.image.get_rect(x=screen_width/4,y=ground_top/2)
     
     def add_image(self):
         self.images={
             'yellow':[],
-            # 'blue':temp[4:9],
-            # 'red':temp[9:13]
+            'blue':[],
+            'red':[]
         }
-        for i in range(3):
-            self.images['yellow'].append(self.get_image(i))
+        yellow=[[3,491,17,12],[31,491,17,12],[59,491,17,12]]
+        blue=[[87,491,17,12],[115,329,17,12],[115,355,17,12]]
+        red=[[115,381,17,12],[115,407,17,12],[115,433,17,12]]
         
+        for pos in yellow:
+            bird=pygame.Surface(self.bird_size)
+            bird.blit(self.sheet_image,(0,0),pos)
+            bird=pygame.transform.scale(bird,(self.bird_w*3,self.bird_h*3))
+            bird.set_colorkey((0,0,0))
+            self.images['yellow'].append(bird)
+        for pos in blue:
+            bird=pygame.Surface(self.bird_size)
+            bird.blit(self.sheet_image,(0,0),pos)
+            bird=pygame.transform.scale(bird,(self.bird_w*3,self.bird_h*3))
+            bird.set_colorkey((0,0,0))
+            self.images['blue'].append(bird)
+        for pos in red:
+            bird=pygame.Surface(self.bird_size)
+            bird.blit(self.sheet_image,(0,0),pos)
+            bird=pygame.transform.scale(bird,(self.bird_w*3,self.bird_h*3))
+            bird.set_colorkey((0,0,0))
+            self.images['red'].append(bird)
     
     def gravity(self):
         self.rect.y+=self.dy
@@ -120,10 +132,10 @@ class Bird(pygame.sprite.Sprite):
                 self.index_img=0
             self.image=color[int(self.index_img)]
             if self.play_game and not self.game_over:
-                self.image=pygame.transform.rotozoom(self.image,max(self.dy*-4,-90),1)
+                self.image=pygame.transform.rotate(self.image,max(self.dy*-4,-90))
         else:
             self.image=color[2]
-            self.image=pygame.transform.rotozoom(self.image,-90,1)
+            self.image=pygame.transform.rotate(self.image,-90)
         self.image.set_colorkey((0,0,0))
     
     def update(self,bird,pipes,riging_sound,crash_sound,die_sound):

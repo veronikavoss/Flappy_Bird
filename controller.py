@@ -1,5 +1,4 @@
 #%%
-from random import *
 from setting import *
 from ground import *
 from bird import *
@@ -9,11 +8,11 @@ class Controller:
     def __init__(self,start_screen,high_score):
         self.start_screen=start_screen
         self.high_score=high_score
-        self.score_update=True
         
+        self.sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png'))
         self.add_image()
+        self.choice_element()
         self.add_sound()
-        self.background()
         self.pipes=pygame.sprite.Group()
         self.ground=Ground()
         self.bird=Bird(self.start_screen)
@@ -22,9 +21,9 @@ class Controller:
         self.update_score=0
         
         self.pipe_spawn_cooldown=pygame.USEREVENT+1
-        pygame.time.set_timer(self.pipe_spawn_cooldown,1200)
+        pygame.time.set_timer(self.pipe_spawn_cooldown,1300)
         self.tap_motion=pygame.USEREVENT+2
-        pygame.time.set_timer(self.tap_motion,1000)
+        pygame.time.set_timer(self.tap_motion,800)
     
     def add_sound(self):
         self.sfx_die=pygame.mixer.Sound(os.path.join(sound_path,'sfx_die.wav'))
@@ -39,7 +38,6 @@ class Controller:
         self.sfx_wing.set_volume(0.5)
     
     def get_number_image(self,num_x,size):
-        self.sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png'))
         num_size=num_w,num_h=12,18
         num_image=pygame.Surface(num_size)
         num_image.blit(self.sheet_image,(0,0),(292+num_x*14,160,num_w,num_h))
@@ -49,6 +47,7 @@ class Controller:
     
     def add_image(self):
         self.images={
+            'background':[],
             'logo':'',
             'play_button':'',
             'score_num':[],
@@ -61,6 +60,12 @@ class Controller:
             'new':'',
             'medal':[]
         }
+        for i in range(2):
+            background=pygame.Surface(background_size)
+            background.blit(self.sheet_image,(0,0),(i*146,0,background_w,background_h))
+            background=pygame.transform.scale(background,(background_w*3,background_h*3))
+            self.images['background'].append(background)
+        
         for num_x in range(10):
             self.images['score_num'].append(self.get_number_image(num_x,3))
         
@@ -133,12 +138,14 @@ class Controller:
             self.images['medal'].append(medal_img)
         self.medal_img_rect=medal_img.get_rect(center=(118,310))
     
-    def background(self):
-        sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png')).convert_alpha()
-        self.background_image=pygame.Surface(background_size).convert()
-        self.background_image.blit(sheet_image,(0,0),(0,0,background_w,background_h))
-        self.background_image=pygame.transform.scale(self.background_image,screen_size)
-        self.background_rect=self.background_image.get_rect()
+    def choice_element(self):
+        self.choice_background=randrange(0,len(self.images['background']))
+    
+    def background(self,display):
+        if self.start_screen:
+            display.blit(self.images['background'][0],(0,0))
+        else:
+            display.blit(self.images['background'][self.choice_background],(0,0))
     
     def create_pipe(self):
         top=randrange(300,501,50)
@@ -163,13 +170,6 @@ class Controller:
             self.ground.update()
         self.bird_sprite.update(*self.bird_sprite,self.pipes,self.sfx_wing,self.sfx_hit,self.sfx_die)
         self.set_score()
-    
-    def text(self,display):
-        font=pygame.font.SysFont(None,80)
-        text=font.render(str(self.score//2),True,'white')
-        text_rect=text.get_rect(center=(screen_width//2,100))
-        blit=display.blit(text,text_rect)
-        return blit
     
     def blit_start_screen(self,display):
         display.blit(self.images['logo'],self.logo_img_rect)
@@ -311,15 +311,13 @@ class Controller:
     
     def draw(self,display):
         if self.start_screen:
-            display.blit(self.background_image,self.background_rect)
+            self.background(display)
             self.ground.draw(display)
             self.bird_sprite.draw(display)
             self.blit_start_screen(display)
         else:
-            display.blit(self.background_image,self.background_rect)
-            self.ground.draw(display)
+            self.background(display)
             self.blit_standby_screen(display)
+            self.ground.draw(display)
             self.bird_sprite.draw(display)
             self.blit_game_over_screen(display)
-            # self.text(display)
-            # print(self.high_score,self.score//2)

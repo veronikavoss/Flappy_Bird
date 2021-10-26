@@ -48,7 +48,6 @@ class Game:
                     self.controller.tap_img_rect.y-=10
             if event.type==self.controller.pipe_spawn_cooldown and self.controller.bird.play_game and not self.controller.bird.game_over:
                 self.controller.create_pipe()
-                print('create_pipe')
             
             if self.start_screen or self.controller.bird.game_over:
                 mouse_pos=pygame.mouse.get_pos()
@@ -56,7 +55,6 @@ class Game:
                     self.controller.sfx_swooshing.play()
                     self.start_screen=False
                     self.high_score.append(self.controller.score//2)
-                    # self.score_update=False
                     self.game_start()
     
     def update(self):
