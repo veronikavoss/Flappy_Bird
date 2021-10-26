@@ -29,7 +29,7 @@ class Bird(pygame.sprite.Sprite):
         self.gravity_force=0
         self.jump_speed=-10
         
-        self.limit_timer=pygame.USEREVENT+1
+        self.limit_timer=pygame.USEREVENT+0
         pygame.time.set_timer(self.limit_timer,400)
     
     def get_image(self,x):
@@ -47,16 +47,14 @@ class Bird(pygame.sprite.Sprite):
             self.rect=self.image.get_rect(x=screen_width/4,y=ground_top/2)
     
     def add_image(self):
-        temp=[]
-        for i in range(3):
-            temp.append(self.get_image(i))
-        temp.append(temp[1])
-        
         self.images={
-            'yellow':temp[0:4],
+            'yellow':[],
             # 'blue':temp[4:9],
             # 'red':temp[9:13]
         }
+        for i in range(3):
+            self.images['yellow'].append(self.get_image(i))
+        
     
     def gravity(self):
         self.rect.y+=self.dy

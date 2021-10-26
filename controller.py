@@ -9,6 +9,8 @@ class Controller:
     def __init__(self,start_screen,high_score):
         self.start_screen=start_screen
         self.high_score=high_score
+        self.score_update=True
+        
         self.add_image()
         self.add_sound()
         self.background()
@@ -19,9 +21,9 @@ class Controller:
         self.score=0
         self.update_score=0
         
-        self.pipe_spawn_cooldown=pygame.USEREVENT+2
+        self.pipe_spawn_cooldown=pygame.USEREVENT+1
         pygame.time.set_timer(self.pipe_spawn_cooldown,1200)
-        self.tap_motion=pygame.USEREVENT+3
+        self.tap_motion=pygame.USEREVENT+2
         pygame.time.set_timer(self.tap_motion,1000)
     
     def add_sound(self):
@@ -221,49 +223,73 @@ class Controller:
     def blit_small_score(self,display):
         num_x,num_y,high_num_y=330,260,324
         num_w,num_h=24,36
-        num=str(self.score//2)
-        num_len=len(num)
-        if num_len==1:
-            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
-        elif num_len==2:
-            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
-            display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,num_y))
-        elif num_len==3:
-            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
-            display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,num_y))
-            display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,num_y))
-        elif num_len==4:
-            display.blit(self.images['score_small_num'][int(num[-1])],(num_x,num_y))
-            display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,num_y))
-            display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,num_y))
-            display.blit(self.images['score_small_num'][int(num[-4])],(num_x-num_w*3,num_y))
+        score=str(self.score//2)
+        score_len=len(score)
+        high_score=str(max(self.high_score))
+        high_score_len=len(high_score)
+        
         if self.bird.game_over_screen:
-            update=self.score//2
-            print(update)
-            if self.high_score<self.score:
-                self.high_score=update
-                # High_score=self.score
+            if max(self.high_score)>=self.score//2:
+                if score_len==1:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                elif score_len==2:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,num_y))
+                elif score_len==3:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-3])],(num_x-num_w*2,num_y))
+                elif score_len==4:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-3])],(num_x-num_w*2,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-4])],(num_x-num_w*3,num_y))
+                
+                if high_score_len==1:
+                    display.blit(self.images['score_small_num'][int(high_score[-1])],(num_x,high_num_y))
+                elif high_score_len==2:
+                    display.blit(self.images['score_small_num'][int(high_score[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(high_score[-2])],(num_x-num_w,high_num_y))
+                elif high_score_len==3:
+                    display.blit(self.images['score_small_num'][int(high_score[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(high_score[-2])],(num_x-num_w,high_num_y))
+                    display.blit(self.images['score_small_num'][int(high_score[-3])],(num_x-num_w*2,high_num_y))
+                elif high_score_len==4:
+                    display.blit(self.images['score_small_num'][int(high_score[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(high_score[-2])],(num_x-num_w,high_num_y))
+                    display.blit(self.images['score_small_num'][int(high_score[-3])],(num_x-num_w*2,high_num_y))
+                    display.blit(self.images['score_small_num'][int(high_score[-4])],(num_x-num_w*3,high_num_y))
+            else:
                 display.blit(self.images['new'],self.new_img_rect)
-                if num_len==1:
-                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
-                elif num_len==2:
-                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
-                    display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,high_num_y))
-                elif num_len==3:
-                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
-                    display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,high_num_y))
-                    display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,high_num_y))
-                elif num_len==4:
-                    display.blit(self.images['score_small_num'][int(num[-1])],(num_x,high_num_y))
-                    display.blit(self.images['score_small_num'][int(num[-2])],(num_x-num_w,high_num_y))
-                    display.blit(self.images['score_small_num'][int(num[-3])],(num_x-num_w*2,high_num_y))
-                    display.blit(self.images['score_small_num'][int(num[-4])],(num_x-num_w*3,high_num_y))
-    
-    def set_high_score(self):
-        if self.bird.game_over_screen:
-            if self.high_score<self.score//2:
-                self.high_score=self.score//2
-        return self.high_score
+                if score_len==1:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                elif score_len==2:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,num_y))
+                elif score_len==3:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-3])],(num_x-num_w*2,num_y))
+                elif score_len==4:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-3])],(num_x-num_w*2,num_y))
+                    display.blit(self.images['score_small_num'][int(score[-4])],(num_x-num_w*3,num_y))
+                
+                if score_len==1:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,high_num_y))
+                elif score_len==2:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,high_num_y))
+                elif score_len==3:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,high_num_y))
+                    display.blit(self.images['score_small_num'][int(score[-3])],(num_x-num_w*2,high_num_y))
+                elif score_len==4:
+                    display.blit(self.images['score_small_num'][int(score[-1])],(num_x,high_num_y))
+                    display.blit(self.images['score_small_num'][int(score[-2])],(num_x-num_w,high_num_y))
+                    display.blit(self.images['score_small_num'][int(score[-3])],(num_x-num_w*2,high_num_y))
+                    display.blit(self.images['score_small_num'][int(score[-4])],(num_x-num_w*3,high_num_y))
     
     def blit_game_over_screen(self,display):
         if self.bird.game_over_screen:
@@ -296,4 +322,4 @@ class Controller:
             self.bird_sprite.draw(display)
             self.blit_game_over_screen(display)
             # self.text(display)
-            print(self.high_score,self.score//2)
+            # print(self.high_score,self.score//2)

@@ -9,7 +9,7 @@ class Game:
         self.screen=pygame.display.set_mode(screen_size)
         self.clock=pygame.time.Clock()
         self.start_screen=True
-        self.high_score=0
+        self.high_score=[0]
         self.game_start()
     
     def game_start(self):
@@ -33,12 +33,13 @@ class Game:
                 self.playing=False
                 quit()
             
-            if event.type==self.controller.bird.limit_timer and (self.controller.bird.action=='standby' or self.start_screen):
-                self.bird_move_count+=1
-                if self.bird_move_count%2==0:
-                    self.controller.bird.dy=-1
-                else:
-                    self.controller.bird.dy=1
+            if event.type==self.controller.bird.limit_timer:
+                if self.controller.bird.action=='standby' or self.start_screen:
+                    self.bird_move_count+=1
+                    if self.bird_move_count%2==0:
+                        self.controller.bird.dy=-1
+                    else:
+                        self.controller.bird.dy=1
             if event.type==self.controller.tap_motion and self.controller.bird.action=='standby':
                 self.tap_count+=1
                 if self.tap_count%2==0:
@@ -54,6 +55,8 @@ class Game:
                 if  event.type==pygame.MOUSEBUTTONUP and self.controller.game_over_play_button_img_rect.collidepoint(mouse_pos):
                     self.controller.sfx_swooshing.play()
                     self.start_screen=False
+                    self.high_score.append(self.controller.score//2)
+                    # self.score_update=False
                     self.game_start()
     
     def update(self):
