@@ -31,7 +31,7 @@ class Game:
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 self.playing=False
-                quit()
+                break
             
             if event.type==self.controller.bird.limit_timer:
                 if self.controller.bird.action=='standby' or self.start_screen:
