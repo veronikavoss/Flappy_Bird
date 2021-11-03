@@ -9,6 +9,8 @@ class Controller:
         self.start_screen=start_screen
         self.high_score=high_score
         
+        self.pipe_spawn=False
+        
         self.sheet_image=pygame.image.load(os.path.join(image_path,'flappy_bird_sheet_1.png'))
         self.add_image()
         self.choice_element()
@@ -20,10 +22,10 @@ class Controller:
         self.score=0
         self.update_score=0
         
-        self.pipe_spawn_cooldown=pygame.USEREVENT+1
-        pygame.time.set_timer(self.pipe_spawn_cooldown,1300)
-        self.tap_motion=pygame.USEREVENT+2
+        self.tap_motion=pygame.USEREVENT+1
         pygame.time.set_timer(self.tap_motion,800)
+        self.pipe_spawn_cooldown=1300
+        self.pipe_spawn_update=0
     
     def add_sound(self):
         self.sfx_die=pygame.mixer.Sound(os.path.join(sound_path,'sfx_die.wav'))
@@ -148,10 +150,17 @@ class Controller:
             display.blit(self.images['background'][self.choice_background],(0,0))
     
     def create_pipe(self):
-        top=randrange(300,501,50)
-        self.top_pipe=Pipe((screen_width,top-680),0)
-        self.bottom_pipe=Pipe((screen_width,top),1)
-        self.pipes.add(self.bottom_pipe,self.top_pipe)
+        if self.bird.play_game and not self.bird.game_over and not self.pipe_spawn:
+            top=randrange(300,501,50)
+            self.top_pipe=Pipe((screen_width+300,top-680),0)
+            self.bottom_pipe=Pipe((screen_width+300,top),1)
+            self.pipes.add(self.bottom_pipe,self.top_pipe)
+            self.pipe_spawn=True
+            self.pipe_spawn_update=pygame.time.get_ticks()
+        elif self.bird.play_game and not self.bird.game_over and self.pipe_spawn:
+            current_time=pygame.time.get_ticks()
+            if current_time-self.pipe_spawn_update>=self.pipe_spawn_cooldown:
+                self.pipe_spawn=False
     
     def set_score(self):
         for pipe in self.pipes:
@@ -169,6 +178,7 @@ class Controller:
         if not self.bird.action=='die' and not self.bird.action=='crash':
             self.ground.update()
         self.bird_sprite.update(*self.bird_sprite,self.pipes,self.sfx_wing,self.sfx_hit,self.sfx_die)
+        self.create_pipe()
         self.set_score()
     
     def blit_start_screen(self,display):

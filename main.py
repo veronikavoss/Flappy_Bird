@@ -33,26 +33,28 @@ class Game:
                 self.playing=False
                 break
             
-            if event.type==self.controller.bird.limit_timer:
+            elif event.type==self.controller.bird.limit_timer:
                 if self.controller.bird.action=='standby' or self.start_screen:
                     self.bird_move_count+=1
                     if self.bird_move_count%2==0:
                         self.controller.bird.dy=-1
                     else:
                         self.controller.bird.dy=1
-            if event.type==self.controller.tap_motion and self.controller.bird.action=='standby':
+            elif event.type==self.controller.tap_motion and self.controller.bird.action=='standby':
                 self.tap_count+=1
                 if self.tap_count%2==0:
                     self.controller.tap_img_rect.y+=10
                 else:
                     self.controller.tap_img_rect.y-=10
-            if event.type==self.controller.pipe_spawn_cooldown and self.controller.bird.play_game and not self.controller.bird.game_over:
-                self.controller.create_pipe()
+            # elif event.type==self.controller.pipe_spawn_cooldown:
+            #     if self.controller.bird.play_game and not self.controller.bird.game_over:
+            #         self.controller.create_pipe()
+            #         print('create pipe')
             
-            if self.start_screen or self.controller.bird.game_over:
+            elif self.start_screen or self.controller.bird.game_over:
                 mouse_pos=pygame.mouse.get_pos()
                 if  event.type==pygame.MOUSEBUTTONUP and self.controller.game_over_play_button_img_rect.collidepoint(mouse_pos):
-                    self.controller.sfx_swooshing.play()
+                    self.controller.sfx_swooshing.play() 
                     self.start_screen=False
                     self.high_score.append(self.controller.score//2)
                     self.game_start()
